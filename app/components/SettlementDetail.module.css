@@ -1,0 +1,208 @@
+/* components/SettlementDetail.module.css */
+
+/* 전체 컨테이너 */
+.container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 30px 24px;
+  background-color: #ffffff;
+  min-height: 100vh;
+  padding-bottom: 80px;
+}
+
+/* 상단 네비게이션 */
+.nav {
+  margin-bottom: 20px;
+}
+
+.backButton {
+  background: none;
+  border: none;
+  font-size: 15px;
+  color: #8b95a1;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.backButton:hover {
+  color: #333d4b;
+}
+
+/* 헤더 영역 */
+.header {
+  margin-bottom: 24px;
+  text-align: center; /* 제목 가운데 정렬 */
+}
+
+.title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #191f28;
+  margin-bottom: 8px;
+}
+
+.date {
+  font-size: 14px;
+  color: #8b95a1;
+}
+
+.infoText {
+  font-size: 14px;
+  color: #6b7684;
+  margin-top: 4px;
+}
+
+/* 공통 아코디언 스타일 (총액 & 참여자) */
+.accordionList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.accordionItem {
+  border: 1px solid #e5e8eb;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: white;
+  transition: all 0.3s ease-in-out;
+}
+
+.accordionItemOpen {
+  border-color: #0064FF;
+  box-shadow: 0 4px 12px rgba(0, 100, 255, 0.1);
+}
+
+.accordionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 20px;
+  cursor: pointer;
+  background-color: #ffffff;
+  transition: background-color 0.2s;
+}
+
+.accordionHeader:hover {
+  background-color: #f9fafb;
+}
+
+/* 총액 아코디언 전용 스타일 (강조) */
+.totalHeader {
+  background-color: #f2f4f6; /* 약간 배경색을 줌 */
+}
+
+.totalLabel {
+  font-size: 17px;
+  font-weight: 700;
+  color: #333d4b;
+}
+
+.totalAmount {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0064FF;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* 참여자 이름 */
+.userName {
+  font-size: 17px;
+  font-weight: 700;
+  color: #333d4b;
+}
+
+/* 참여자 금액 */
+.userTotal {
+  font-size: 17px;
+  font-weight: 800;
+  color: #333d4b; /* 참여자는 검은색으로, 총액과 구분 */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.arrow {
+  font-size: 14px;
+  color: #8b95a1;
+  transition: transform 0.3s ease-in-out;
+}
+
+.arrowOpen {
+  transform: rotate(180deg);
+  color: #0064FF;
+}
+
+/* 아코디언 내용 영역 */
+.accordionContent {
+  background-color: #f9fafb;
+  padding: 20px;
+  border-top: 1px solid #e5e8eb;
+  animation: slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start; /* 긴 내용 고려 상단 정렬 */
+  padding: 8px 0;
+  border-bottom: 1px dashed #d1d6db;
+  font-size: 15px;
+  color: #4e5968;
+}
+
+.detailRow:last-child {
+  border-bottom: none;
+}
+
+.detailLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.detailTime {
+  font-size: 12px;
+  color: #8b95a1;
+}
+
+/* 섹션 타이틀 */
+.sectionTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333d4b;
+  margin-top: 30px;
+  margin-bottom: 12px;
+  padding-left: 4px;
+}
+
+/* 하단 개발용 버튼 */
+.linkButton {
+  width: 100%;
+  margin-top: 40px;
+  padding: 14px;
+  background-color: #333333;
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.linkButton:hover {
+  background-color: #1a1a1a;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

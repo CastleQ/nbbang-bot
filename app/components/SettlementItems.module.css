@@ -1,0 +1,240 @@
+/* components/SettlementItems.module.css */
+
+/* 전체 컨테이너 */
+.container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #333d4b;
+}
+
+/* 개별 항목 카드 */
+.itemCard {
+  background-color: #f9fafb;
+  border: 1px solid #e5e8eb;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+/* 항목 상단 (이름, 금액) */
+.rowTop {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+/* 항목 하단 (정산 방식 등) */
+.rowBottom {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* 입력창 공통 */
+.input, .select {
+  width: 100%;
+  padding: 12px;
+  font-size: 15px;
+  border: 1px solid #d1d6db;
+  border-radius: 8px;
+  outline: none;
+  background-color: white;
+}
+
+.inputName { flex: 2; }
+.inputPrice { flex: 1; text-align: right; }
+
+/* 세그먼트 컨트롤 (정산 방식 선택 탭) */
+.segmentControl {
+  display: flex;
+  background-color: #f2f4f6;
+  padding: 4px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.segmentButton {
+  flex: 1;
+  padding: 8px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7684;
+  background-color: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.segmentButtonActive {
+  background-color: #ffffff;
+  color: #0064FF;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* 시간 입력 영역 (콤팩트 디자인) */
+.timeSection {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background-color: #ffffff;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d6db;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.timeInputs {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.timeSelect {
+  flex: 1;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #d1d6db;
+  border-radius: 6px;
+  background-color: #f9fafb;
+  cursor: pointer;
+  text-align: center;
+  outline: none;
+}
+
+.durationText {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0064FF;
+  text-align: center;
+  margin-top: 4px;
+}
+
+/* 삭제 버튼 */
+.deleteButton {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 28px;
+  height: 28px;
+  background-color: #ff3b30;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.addButton {
+  width: 100%;
+  padding: 14px;
+  background-color: #f2f4f6;
+  color: #4e5968;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 8px;
+  margin-bottom: 24px;
+}
+
+/* 참여 인원수 섹션 */
+.participantSection {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+.label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #4e5968;
+}
+
+.participantSelect {
+  width: 120px;
+  padding: 10px;
+  font-size: 15px;
+  border: 1px solid #d1d6db;
+  border-radius: 8px;
+  background-color: white;
+  text-align: center;
+  outline: none;
+}
+
+.totalSection {
+  border-top: 2px dashed #d1d6db;
+  padding-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.totalLabel { font-size: 18px; font-weight: 600; color: #333d4b; }
+.totalPrice { font-size: 24px; font-weight: 800; color: #0064FF; }
+
+/* [수정됨] 정산 시작하기 버튼 (애니메이션 적용) */
+.nextButton {
+  width: 100%;
+  padding: 16px;
+  
+  /* 그라데이션 배경: 파랑 -> 밝은 파랑 -> 파랑 */
+  background: linear-gradient(90deg, #0064FF 0%, #4D96FF 50%, #0064FF 100%);
+  background-size: 200% auto; /* 배경을 두 배로 늘려서 이동할 공간 확보 */
+  
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 100, 255, 0.3);
+  
+  /* [모바일 기본] 숨쉬듯이 계속 흐르게 (3초 간격 무한반복) */
+  animation: shimmer 4s infinite linear;
+}
+
+/* [데스크톱] 마우스가 있는 환경에서는 평소엔 멈추고, 호버 시에만 빠르게 작동 */
+@media (hover: hover) {
+  .nextButton {
+    animation: none; /* 평소엔 정지 */
+  }
+  .nextButton:hover {
+    animation: shimmer 2s infinite linear; /* 호버 시 1초 만에 샥- 지나감 */
+  }
+}
+
+/* 쉬머(Shimmer) 애니메이션 정의 */
+@keyframes shimmer {
+  0% {
+    background-position: 0% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}

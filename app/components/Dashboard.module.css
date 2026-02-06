@@ -1,0 +1,201 @@
+/* components/Dashboard.module.css */
+
+/* 전체 컨테이너 */
+.container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 24px 20px;
+  min-height: 100vh;
+  padding-bottom: 100px; /* 하단 버튼 공간 확보 */
+}
+
+/* 상단 헤더 */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #191f28;
+}
+
+/* [NEW] 편집/취소 버튼 */
+.editButton {
+  background: none;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  color: #8b95a1;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.editButton:hover {
+  color: #333d4b;
+}
+
+/* 정산 내역이 없을 때 */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  color: #8b95a1;
+  text-align: center;
+}
+
+.emptyText {
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+/* 정산 카드 리스트 */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* 개별 정산 카드 */
+.card {
+  background-color: white;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid #f2f4f6;
+  
+  /* [NEW] 체크박스와 내용물을 가로로 배치하기 위해 */
+  display: flex;
+  align-items: center; 
+  gap: 16px;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* [NEW] 카드 내용물 (체크박스 제외한 나머지) */
+.cardContent {
+  flex: 1; /* 남은 공간 다 차지 */
+}
+
+/* [NEW] 체크박스 디자인 (커스텀) */
+.checkbox {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #d1d6db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0; /* 크기 줄어듦 방지 */
+  transition: all 0.2s;
+}
+
+.checkboxSelected {
+  background-color: #0064FF;
+  border-color: #0064FF;
+  color: white;
+}
+
+/* 체크 아이콘 (V 모양) */
+.checkIcon {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+
+/* 카드 내부 텍스트들 */
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.cardTitle {
+  font-size: 17px;
+  font-weight: 700;
+  color: #333d4b;
+}
+
+.cardDate {
+  font-size: 13px;
+  color: #8b95a1;
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.cardSettler {
+  font-size: 14px;
+  color: #6b7684;
+}
+
+.cardAmount {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0064FF;
+}
+
+/* 하단 고정 버튼 (파란색: 생성) */
+.createButton {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 460px;
+  padding: 16px;
+  background-color: #0064FF;
+  color: white;
+  font-size: 17px;
+  font-weight: 700;
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 100, 255, 0.3);
+  cursor: pointer;
+  z-index: 100;
+  transition: background-color 0.3s;
+}
+
+.createButton:active {
+  background-color: #0050cc;
+  transform: translateX(-50%) scale(0.98);
+}
+
+/* [NEW] 하단 고정 버튼 (빨간색: 삭제) */
+.deleteButton {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 460px;
+  padding: 16px;
+  background-color: #ff3b30; /* 빨간색 */
+  color: white;
+  font-size: 17px;
+  font-weight: 700;
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(255, 59, 48, 0.3);
+  cursor: pointer;
+  z-index: 100;
+  transition: background-color 0.3s;
+}
+
+.deleteButton:active {
+  background-color: #e0352b;
+  transform: translateX(-50%) scale(0.98);
+}

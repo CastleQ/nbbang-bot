@@ -1,0 +1,112 @@
+/* 전체 폼 컨테이너: 깔끔한 흰색 박스에 그림자 효과 */
+.container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 24px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #333d4b;
+}
+
+/* 입력 필드 그룹 */
+.inputGroup {
+  margin-bottom: 20px;
+}
+
+.label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4e5968;
+  margin-bottom: 8px;
+}
+
+.required {
+  color: #e94e58; /* 필수 항목 빨간 별 */
+  margin-left: 4px;
+}
+
+/* 입력창 디자인: 토스 느낌의 부드러운 회색 테두리 */
+.input {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  border: 1px solid #d1d6db;
+  border-radius: 8px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  border-color: #0064FF; /* 포커스 되면 파란색 */
+}
+
+/* 저장 버튼: 토스 블루 컬러 */
+.button {
+  width: 100%;
+  padding: 16px;
+  background-color: #0064FF;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 10px;
+}
+
+.button:hover {
+  background-color: #0050cc;
+}
+/* --- 기존 코드 아래에 추가하세요 --- */
+
+/* 가로로 나란히 배치하는 컨테이너 */
+.row {
+  display: flex;       /* 내용물을 가로로 배치하겠다는 뜻 */
+  gap: 12px;           /* 두 입력창 사이의 간격 */
+  margin-bottom: 20px; /* 줄 바꿈 여백 */
+}
+
+/* row 안에 있는 입력 그룹들은 공간을 똑같이(50:50) 나눠가짐 */
+.row .inputGroup {
+  flex: 1;             /* 공간 비율 1:1 */
+  margin-bottom: 0;    /* 내부 마진 제거 (row가 대신 담당) */
+}
+/* 시간 입력 영역 */
+.timeSection {
+  display: flex;
+  flex-direction: column; /* 세로 배치로 변경 (시간입력칸 아래에 텍스트 넣기 위해) */
+  gap: 8px;
+  background-color: #ffffff;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d6db;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* 시간 입력칸들을 감싸는 가로 줄 */
+.timeInputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.timeLabel { font-size: 13px; color: #6b7684; white-space: nowrap; }
+
+/* [NEW] 계산된 시간 보여주는 텍스트 */
+.durationText {
+  font-size: 12px;
+  font-weight: 600;
+  color: #0064FF; /* 파란색으로 강조 */
+  text-align: right; /* 오른쪽 끝에 배치 */
+  padding-right: 4px;
+}

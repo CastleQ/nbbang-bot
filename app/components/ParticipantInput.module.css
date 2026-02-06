@@ -1,0 +1,212 @@
+/* components/ParticipantInput.module.css */
+
+.container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 24px 20px;
+  background-color: #ffffff;
+  min-height: 100vh;
+  padding-bottom: 100px;
+}
+
+.header {
+  margin-bottom: 30px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #191f28;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 15px;
+  color: #6b7684;
+  line-height: 1.4;
+}
+
+/* 입력 폼 섹션 */
+.section {
+  margin-bottom: 32px;
+}
+
+.label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7684;
+  margin-bottom: 8px;
+}
+
+/* [NEW] 필수 항목 빨간 별표 */
+.required {
+  color: #ff3b30;
+  margin-left: 2px;
+}
+
+.input {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  border: 1px solid #d1d6db;
+  border-radius: 12px;
+  outline: none;
+  background-color: #fff;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  border-color: #0064FF;
+}
+
+/* 항목 리스트 카드 */
+.itemCard {
+  background-color: #f9fafb;
+  border: 1px solid #e5e8eb;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+  transition: all 0.2s;
+}
+
+/* 선택된 상태일 때 강조 */
+.itemCardActive {
+  background-color: #e8f3ff;
+  border-color: #0064FF;
+}
+
+.itemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.itemName {
+  font-size: 17px;
+  font-weight: 700;
+  color: #333d4b;
+}
+
+.itemPrice {
+  font-size: 14px;
+  color: #6b7684;
+}
+
+/* 체크박스 (토글) 영역 */
+.checkboxContainer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.checkbox {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid #d1d6db;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.checkboxChecked {
+  background-color: #0064FF;
+  border-color: #0064FF;
+  color: white;
+}
+
+.checkLabel {
+  font-size: 15px;
+  color: #333d4b;
+}
+
+/* 시간 입력 영역 */
+.timeSection {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #d1d6db;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.timeDesc {
+  font-size: 13px;
+  color: #8b95a1;
+  margin-bottom: 8px;
+}
+
+.timeInputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.timeSelect {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #d1d6db;
+  border-radius: 8px;
+  background-color: white;
+  text-align: center;
+  font-size: 14px;
+}
+
+/* 하단 제출 버튼 */
+.submitButton {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 460px;
+  padding: 16px;
+  background-color: #0064FF;
+  color: white;
+  font-size: 17px;
+  font-weight: 700;
+  border: none;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 100, 255, 0.3);
+  cursor: pointer;
+  z-index: 100;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+/* ... (기존 코드 유지) ... */
+
+/* [NEW] 정산자 전달사항 메시지 박스 */
+.messageBox {
+  background-color: #f2f4f6;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  color: #4e5968;
+  margin-top: 16px;
+  margin-bottom: 8px;
+  line-height: 1.5;
+  border-left: 4px solid #0064FF; /* 파란색 강조 선 */
+}
+
+/* 메시지 박스 안의 아이콘/제목 */
+.messageLabel {
+  display: block;
+  font-weight: 700;
+  color: #333d4b;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+/* [NEW] 항목 선택 가이드 텍스트 */
+.helperText {
+  font-size: 13px;     /* 라벨보다 작게 */
+  color: #8b95a1;      /* 연한 회색 */
+  margin-top: -4px;    /* 라벨과의 간격을 좁힘 */
+  margin-bottom: 12px; /* 아래 카드와의 간격 */
+  line-height: 1.4;
+}
