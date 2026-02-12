@@ -1,7 +1,7 @@
 /* Toast.module.css */
 .container {
   position: fixed;
-  bottom: 30px;
+  /* bottom: 30px;  <-- 이거 지움 (아래 클래스로 제어) */
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
@@ -11,14 +11,24 @@
   width: auto;
   min-width: 200px;
   max-width: 90%;
-  pointer-events: none; /* 클릭 통과 (알림 떠도 뒤에 버튼 누를 수 있게) */
+  pointer-events: none; /* 클릭 통과 */
+  transition: all 0.3s ease; /* 위치 이동 시 부드럽게 */
+}
+
+/* [NEW] 위치 결정 클래스 */
+.bottom {
+  bottom: 30px;
+}
+
+.top {
+  top: 30px;
 }
 
 .toast {
-  background-color: #202632; /* 서브컬러 (짙은 배경) */
+  background-color: #202632; 
   color: #ffffff;
   padding: 14px 20px;
-  border-radius: 24px; /* 둥근 캡슐 모양 (Toss Style) */
+  border-radius: 24px; 
   font-size: 15px;
   font-weight: 500;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -32,14 +42,12 @@
   animation: slideUpFadeIn 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
-/* 사라질 때 애니메이션 (JavaScript로 클래스 추가 시 사용) */
 .toast.hiding {
   animation: fadeOut 0.3s ease forwards;
 }
 
-/* 아이콘 스타일 */
 .icon {
-  color: #0064FF; /* 메인컬러 (포인트) */
+  color: #0064FF; 
   font-size: 18px;
 }
 

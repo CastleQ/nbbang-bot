@@ -7,6 +7,9 @@ import { useRouter } from "next/navigation";
 import { db } from "../lib/firebase";
 import { collection, addDoc } from "firebase/firestore"; 
 
+// 히스토리 매니저 임포트
+import { addToHistory } from "../lib/historyManager";
+
 interface Item {
   id: number;
   category: string;
@@ -28,10 +31,10 @@ export default function SettlementItems() {
   const [totalAmount, setTotalAmount] = useState(0);
 
   const participantOptions = Array.from({ length: 40 }, (_, i) => i + 1);
-  const timeOptions = Array.from({ length: 48 }, (_, i) => {
-    const hour = Math.floor(i / 2).toString().padStart(2, "0");
-    const minute = ((i % 2) * 30).toString().padStart(2, "0");
-    return `${hour}:${minute}`;
+  
+  const timeOptions = Array.from({ length: 24 }, (_, i) => {
+    const hour = i.toString().padStart(2, "0");
+    return `${hour}:00`;
   });
 
   useEffect(() => {
@@ -66,9 +69,7 @@ export default function SettlementItems() {
       prev.map((item) => {
         if (item.id === id) {
           if (field === "price") {
-            // 숫자 외의 문자는 제거 (콤마 처리는 별도 포맷팅이 필요하다면 여기서 추가)
             value = value.replace(/[^0-9]/g, "");
-            // 천 단위 콤마 추가 (UX 향상)
             if (value) {
                 value = Number(value).toLocaleString();
             }
@@ -112,12 +113,21 @@ export default function SettlementItems() {
   };
 
   const handleCreateSettlement = async () => {
-    if (totalAmount === 0) {
-      alert("총 정산 금액을 입력해주세요.");
+    const sanitizedItems = items.map(item => ({
+      ...item,
+      price: item.price === "" ? "0" : item.price
+    }));
+
+    const sanitizedTotal = sanitizedItems.reduce((sum, item) => {
+      return sum + (parseInt(item.price.replace(/,/g, "")) || 0);
+    }, 0);
+
+    if (sanitizedTotal === 0) {
+      alert("총 정산 금액이 0원입니다. 금액을 확인해주세요.");
       return;
     }
 
-    const isIncompleteTime = items.some(
+    const isIncompleteTime = sanitizedItems.some(
       (item) => item.method === "hourly" && (!item.startTime || !item.endTime)
     );
     if (isIncompleteTime) {
@@ -133,12 +143,21 @@ export default function SettlementItems() {
       let settlerName = "알 수 없음";
       let groupName = "제목 없음";
       let settlerMessage = "";
+      let bankInfo = null;
 
       if (settlerInfoStr) {
         const parsed = JSON.parse(settlerInfoStr);
         settlerName = parsed.accountHolder;
         groupName = parsed.groupName || new Date().toLocaleString() + " 정산";
         settlerMessage = parsed.message || "";
+        
+        if (parsed.bankName && parsed.accountNumber) {
+            bankInfo = {
+                bankName: parsed.bankName,
+                accountNumber: parsed.accountNumber,
+                accountHolder: parsed.accountHolder
+            };
+        }
       }
 
       const newSettlement = {
@@ -146,13 +165,21 @@ export default function SettlementItems() {
         settler: settlerName,
         settlerMessage: settlerMessage,
         participantCount: participantCount,
-        items: items,
-        totalAmount: totalAmount,
+        items: sanitizedItems,
+        totalAmount: sanitizedTotal,
         createdAt: new Date().toISOString(),
-        participants: [] 
+        participants: [],
+        bankInfo: bankInfo
       };
 
-      await addDoc(collection(db, "settlements"), newSettlement);
+      // 1. DB에 저장
+      const docRef = await addDoc(collection(db, "settlements"), newSettlement);
+
+      // 2. 히스토리 추가
+      addToHistory(docRef.id);
+
+      // [NEW] 3. 정산 생성자(관리자) 권한 부여 (로컬 스토리지에 키 저장)
+      localStorage.setItem(`isCreator_${docRef.id}`, "true");
 
       alert("정산이 서버에 저장되었습니다! 🎉");
       window.location.reload(); 
@@ -186,7 +213,6 @@ export default function SettlementItems() {
               value={item.category}
               onChange={(e) => handleChange(item.id, "category", e.target.value)}
             />
-            {/* [수정됨] 금액 입력란: 숫자 키패드 적용 */}
             <input
               type="text"
               inputMode="numeric"

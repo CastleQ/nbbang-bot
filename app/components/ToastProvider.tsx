@@ -1,46 +1,62 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useRef, ReactNode } from "react";
+// CSS 파일명은 사용자분 환경에 맞춰주세요
 import styles from "./Toast.module.css";
 
-// 1. Context 만들기 (전역에서 쓸 리모컨 정의)
 interface ToastContextType {
-  showToast: (message: string) => void;
+  showToast: (message: string, position?: "top" | "bottom") => void;
 }
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
-// 2. Provider 컴포넌트 (앱 전체를 감쌀 껍데기)
 export function ToastProvider({ children }: { children: ReactNode }) {
-  const [message, setMessage] = useState("");
-  const [isVisible, setIsVisible] = useState(false);
-  const [isHiding, setIsHiding] = useState(false); // 사라지는 애니메이션용
+  const [toast, setToast] = useState<{
+    message: string;
+    visible: boolean;
+    closing: boolean; // [NEW] 사라지는 애니메이션 실행용 상태
+    position: "top" | "bottom";
+  }>({
+    message: "",
+    visible: false,
+    closing: false,
+    position: "bottom",
+  });
 
-  const showToast = (msg: string) => {
-    setMessage(msg);
-    setIsVisible(true);
-    setIsHiding(false);
+  // 타이머 ID 저장소 (연속 호출 시 기존 타이머 취소용)
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-    // 3초 뒤에 사라지게 예약
-    setTimeout(() => {
-      setIsHiding(true); // 사라지는 애니메이션 시작
+  const showToast = (message: string, position: "top" | "bottom" = "bottom") => {
+    // 1. 기존에 돌고 있던 '사라지기 타이머'가 있다면 취소 (새 메시지가 우선)
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+
+    // 2. 새 토스트 즉시 표시 (closing은 false로 초기화)
+    setToast({ message, visible: true, closing: false, position });
+    
+    // 3. 3초 유지 후 '사라지는 상태'로 전환
+    timerRef.current = setTimeout(() => {
+      setToast((prev) => ({ ...prev, closing: true }));
+
+      // 4. 애니메이션 시간(0.4초)만큼 기다린 뒤 완전히 삭제
+      // (CSS의 fadeOut 애니메이션 시간이 0.3~0.4초이므로 그에 맞춤)
       setTimeout(() => {
-        setIsVisible(false); // 완전히 제거
-      }, 300); // CSS fadeOut 시간(0.3s)과 맞춤
-    }, 3000);
+        setToast((prev) => ({ ...prev, visible: false }));
+      }, 400); 
+    }, 1000);
   };
 
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      
-      {/* 화면에 띄울 토스트 UI */}
-      {isVisible && (
-        <div className={styles.container}>
-          <div className={`${styles.toast} ${isHiding ? styles.hiding : ""}`}>
-            {/* 체크 아이콘 (원하면 제거 가능) */}
-            <span className={styles.icon}>✔</span> 
-            {message}
+      {toast.visible && (
+        <div 
+          className={`${styles.container} ${toast.position === "top" ? styles.top : styles.bottom}`}
+        >
+          {/* closing 상태일 때 styles.hiding 클래스를 붙여서 fadeOut 애니메이션 발동 */}
+          <div className={`${styles.toast} ${toast.closing ? styles.hiding : ""}`}>
+            {toast.message}
           </div>
         </div>
       )}
@@ -48,7 +64,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// 3. 커스텀 훅 (다른 파일에서 쉽게 쓰도록 포장)
 export function useToast() {
   const context = useContext(ToastContext);
   if (!context) {

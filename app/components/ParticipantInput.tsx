@@ -3,6 +3,10 @@
 import { useState } from "react";
 import styles from "./ParticipantInput.module.css";
 import { useToast } from "./ToastProvider";
+import { useRouter } from "next/navigation"; 
+
+// 히스토리 매니저 임포트
+import { addToHistory } from "../lib/historyManager";
 
 interface Props {
   settlementData: any; 
@@ -18,6 +22,7 @@ interface CustomItem {
 
 export default function ParticipantInput({ settlementData, onSubmit }: Props) {
   const { showToast } = useToast();
+  const router = useRouter(); 
 
   const [name, setName] = useState("");
   const [contact, setContact] = useState("");
@@ -132,6 +137,11 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
       submittedAt: new Date().toISOString(),
     };
 
+    // 참여 완료 시 내 히스토리에 정산 ID 추가
+    if (settlementData.id) {
+      addToHistory(settlementData.id);
+    }
+
     onSubmit(participantData);
   };
 
@@ -142,6 +152,9 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
         <div className={styles.subtitle}>
           정산자: {settlementData.settler}
         </div>
+        
+        {/* 헤더 버튼 제거됨 */}
+
         {settlementData.settlerMessage && (
           <div className={styles.messageBox}>
             <span className={styles.messageLabel}>📢 전달사항</span>
@@ -188,6 +201,11 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
         {/* 기존 공통 항목들 */}
         {settlementData.items.map((item: any) => {
           const isSelected = selections[item.id]?.joined;
+          
+          const settlerStartTime = item.startTime;
+          const settlerStartIdx = settlerStartTime ? timeOptions.indexOf(settlerStartTime) : -1;
+          const availableEndTimes = settlerStartIdx !== -1 ? timeOptions.slice(settlerStartIdx) : timeOptions;
+
           return (
             <div 
               key={item.id} 
@@ -228,7 +246,7 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
                       value={selections[item.id].endTime || ""}
                       onChange={(e) => handleTimeChange(item.id, "endTime", e.target.value)}
                     >
-                      {timeOptions.map((t) => <option key={t} value={t}>{t}</option>)}
+                      {availableEndTimes.map((t) => <option key={t} value={t}>{t}</option>)}
                     </select>
                   </div>
                 </div>
@@ -346,7 +364,7 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
                 </button>
               </div>
 
-              {/* [NEW] 안내 문구 추가 */}
+              {/* 안내 문구 */}
               <p style={{ 
                 marginTop: "12px", 
                 fontSize: "10px", 
@@ -362,9 +380,33 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
 
       </section>
 
-      <button className={styles.submitButton} onClick={handleSubmit}>
-        입력 완료
-      </button>
+      {/* [수정됨] 하단 버튼 영역 */}
+      <div style={{ marginTop: "40px" }}>
+        {/* 결과 보기 버튼 */}
+        <button
+          onClick={() => router.push(`/settlement/${settlementData.id}/result`)}
+          style={{
+            width: "100%",
+            padding: "16px",
+            backgroundColor: "#f2f4f6", // 회색 배경
+            color: "#4e5968", // 진한 회색 텍스트
+            border: "none",
+            borderRadius: "12px",
+            fontWeight: "bold",
+            fontSize: "16px",
+            cursor: "pointer",
+            marginBottom: "12px", // 입력 완료 버튼과의 간격
+            // 호버 효과는 기본적으로 없음 (CSS 클래스 미사용)
+          }}
+        >
+          📊 실시간 정산 결과 보기
+        </button>
+
+        {/* 입력 완료 버튼 */}
+        <button className={styles.submitButton} onClick={handleSubmit}>
+          입력 완료
+        </button>
+      </div>
       
       <div style={{ height: "60px" }}></div>
     </div>
