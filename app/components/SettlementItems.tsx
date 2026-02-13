@@ -5,10 +5,16 @@ import styles from "./SettlementItems.module.css";
 import { useRouter } from "next/navigation";
 
 import { db } from "../lib/firebase";
-import { collection, addDoc } from "firebase/firestore"; 
+// [수정] updateDoc, doc 추가
+import { collection, addDoc, updateDoc, doc } from "firebase/firestore"; 
 
-// 히스토리 매니저 임포트
 import { addToHistory } from "../lib/historyManager";
+
+// [NEW] Props 인터페이스 정의 (수정 모드를 위해)
+interface Props {
+  initialData?: any; // 기존 정산 데이터 (수정 시)
+  docId?: string;    // 문서 ID (수정 시)
+}
 
 interface Item {
   id: number;
@@ -19,7 +25,8 @@ interface Item {
   endTime?: string;
 }
 
-export default function SettlementItems() {
+// [수정] props 받기
+export default function SettlementItems({ initialData, docId }: Props) {
   const router = useRouter();
   
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,6 +36,17 @@ export default function SettlementItems() {
     { id: Date.now(), category: "", price: "", method: "general" }
   ]);
   const [totalAmount, setTotalAmount] = useState(0);
+
+  // [NEW] 수정 모드인지 확인
+  const isEditMode = !!initialData && !!docId;
+
+  // [NEW] 초기 데이터 로드 (수정 모드일 때)
+  useEffect(() => {
+    if (isEditMode && initialData) {
+      setItems(initialData.items || []);
+      setParticipantCount(initialData.participantCount || "");
+    }
+  }, [initialData, isEditMode]);
 
   const participantOptions = Array.from({ length: 40 }, (_, i) => i + 1);
   
@@ -139,53 +157,64 @@ export default function SettlementItems() {
     setIsSubmitting(true);
 
     try {
-      const settlerInfoStr = localStorage.getItem("settlerInfo");
-      let settlerName = "알 수 없음";
-      let groupName = "제목 없음";
-      let settlerMessage = "";
-      let bankInfo = null;
+      // [수정] 수정 모드일 경우 기존 데이터 업데이트
+      if (isEditMode && docId) {
+        const docRef = doc(db, "settlements", docId);
+        await updateDoc(docRef, {
+            items: sanitizedItems,
+            totalAmount: sanitizedTotal,
+            participantCount: participantCount,
+            // settler, title 등은 수정하지 않음 (필요 시 추가)
+        });
 
-      if (settlerInfoStr) {
-        const parsed = JSON.parse(settlerInfoStr);
-        settlerName = parsed.accountHolder;
-        groupName = parsed.groupName || new Date().toLocaleString() + " 정산";
-        settlerMessage = parsed.message || "";
-        
-        if (parsed.bankName && parsed.accountNumber) {
-            bankInfo = {
-                bankName: parsed.bankName,
-                accountNumber: parsed.accountNumber,
-                accountHolder: parsed.accountHolder
-            };
+        alert("정산 내용이 수정되었습니다! 🛠️");
+        router.push(`/settlement/${docId}/result`); // 결과 페이지로 이동
+      } 
+      // [기존] 생성 모드일 경우 새로 추가
+      else {
+        const settlerInfoStr = localStorage.getItem("settlerInfo");
+        let settlerName = "알 수 없음";
+        let groupName = "제목 없음";
+        let settlerMessage = "";
+        let bankInfo = null;
+
+        if (settlerInfoStr) {
+            const parsed = JSON.parse(settlerInfoStr);
+            settlerName = parsed.accountHolder;
+            groupName = parsed.groupName || new Date().toLocaleString() + " 정산";
+            settlerMessage = parsed.message || "";
+            
+            if (parsed.bankName && parsed.accountNumber) {
+                bankInfo = {
+                    bankName: parsed.bankName,
+                    accountNumber: parsed.accountNumber,
+                    accountHolder: parsed.accountHolder
+                };
+            }
         }
+
+        const newSettlement = {
+            title: groupName,
+            settler: settlerName,
+            settlerMessage: settlerMessage,
+            participantCount: participantCount,
+            items: sanitizedItems,
+            totalAmount: sanitizedTotal,
+            createdAt: new Date().toISOString(),
+            participants: [],
+            bankInfo: bankInfo
+        };
+
+        const docRef = await addDoc(collection(db, "settlements"), newSettlement);
+        addToHistory(docRef.id);
+        localStorage.setItem(`isCreator_${docRef.id}`, "true");
+
+        alert("정산이 서버에 저장되었습니다! 🎉");
+        window.location.reload();
       }
 
-      const newSettlement = {
-        title: groupName,
-        settler: settlerName,
-        settlerMessage: settlerMessage,
-        participantCount: participantCount,
-        items: sanitizedItems,
-        totalAmount: sanitizedTotal,
-        createdAt: new Date().toISOString(),
-        participants: [],
-        bankInfo: bankInfo
-      };
-
-      // 1. DB에 저장
-      const docRef = await addDoc(collection(db, "settlements"), newSettlement);
-
-      // 2. 히스토리 추가
-      addToHistory(docRef.id);
-
-      // [NEW] 3. 정산 생성자(관리자) 권한 부여 (로컬 스토리지에 키 저장)
-      localStorage.setItem(`isCreator_${docRef.id}`, "true");
-
-      alert("정산이 서버에 저장되었습니다! 🎉");
-      window.location.reload(); 
-
     } catch (error) {
-      console.error("Error adding document: ", error);
+      console.error("Error saving document: ", error);
       alert("저장 중 오류가 발생했습니다.");
       setIsSubmitting(false); 
     }
@@ -193,7 +222,8 @@ export default function SettlementItems() {
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.title}>지출 항목 입력</h2>
+      {/* 타이틀 변경 */}
+      <h2 className={styles.title}>{isEditMode ? "지출 항목 수정" : "지출 항목 입력"}</h2>
 
       {items.map((item, index) => (
         <div key={item.id} className={styles.itemCard}>
@@ -305,14 +335,26 @@ export default function SettlementItems() {
         </span>
       </div>
 
-      <button 
-        className={styles.nextButton} 
-        onClick={handleCreateSettlement}
-        disabled={isSubmitting}
-        style={{ opacity: isSubmitting ? 0.7 : 1, cursor: isSubmitting ? 'wait' : 'pointer' }}
-      >
-        {isSubmitting ? "저장 중..." : "정산 시작하기"}
-      </button>
+      <div style={{ display: 'flex', gap: '10px' }}>
+        {/* 수정 모드일 때 취소 버튼 표시 */}
+        {isEditMode && (
+             <button 
+             className={styles.nextButton} 
+             onClick={() => router.back()}
+             style={{ backgroundColor: '#f2f4f6', color: '#4e5968', flex: 1 }}
+           >
+             취소
+           </button>
+        )}
+        <button 
+            className={styles.nextButton} 
+            onClick={handleCreateSettlement}
+            disabled={isSubmitting}
+            style={{ opacity: isSubmitting ? 0.7 : 1, cursor: isSubmitting ? 'wait' : 'pointer', flex: 2 }}
+        >
+            {isSubmitting ? "저장 중..." : (isEditMode ? "수정 완료" : "정산 시작하기")}
+        </button>
+      </div>
     </div>
   );
 }

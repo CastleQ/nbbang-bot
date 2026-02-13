@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation"; 
 import styles from "./SettlementDetail.module.css";
 
 // Firebase 모듈
@@ -18,6 +19,7 @@ interface Props {
 
 export default function SettlementDetail({ data, onBack, onLinkTest }: Props) {
   const { showToast } = useToast();
+  const router = useRouter();
 
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [isTotalExpanded, setIsTotalExpanded] = useState(false);
@@ -29,10 +31,10 @@ export default function SettlementDetail({ data, onBack, onLinkTest }: Props) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingParticipant, setEditingParticipant] = useState<any>(null);
 
-  // 관리자(정산 생성자) 여부 State
+  // 정산 생성자(나) 여부 State
   const [isCreator, setIsCreator] = useState(false);
 
-  // 관리자 여부 확인 (useEffect)
+  // 정산 생성자(나) 여부 확인 (useEffect)
   useEffect(() => {
     // 로컬 스토리지에서 생성자 표식 확인
     const creatorMark = localStorage.getItem(`isCreator_${data.id}`);
@@ -242,10 +244,32 @@ export default function SettlementDetail({ data, onBack, onLinkTest }: Props) {
 
   return (
     <div className={styles.container}>
-      <nav className={styles.nav}>
+      {/* 상단 네비게이션: 양쪽 정렬(Space Between) 적용 */}
+      <nav className={styles.nav} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <button onClick={onBack} className={styles.backButton}>
           ← 목록으로 돌아가기
         </button>
+
+        {/* [NEW] 정산 생성자(나)에게만 보이는 텍스트형 수정 버튼 */}
+        {isCreator && (
+            <button 
+                onClick={() => router.push(`/settlement/${data.id}/edit`)}
+                style={{
+                    background: "none",
+                    border: "none",
+                    color: "#8b95a1", // 은은한 회색 (Toss Style)
+                    fontSize: "15px",
+                    fontWeight: "400",
+                    cursor: "pointer",
+                    padding: "8px", // 터치 영역 확보
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "4px"
+                }}
+            >
+                ⚙️ 항목 추가/수정
+            </button>
+        )}
       </nav>
 
       <header className={styles.header}>
@@ -302,7 +326,7 @@ export default function SettlementDetail({ data, onBack, onLinkTest }: Props) {
         {participants.length === 0 && (
           <div style={{ textAlign: "center", color: "#8b95a1", padding: "20px", fontSize: "14px" }}>
             아직 입력한 참여자가 없습니다.<br/>
-            아래 버튼을 통해 참여자 입력을 테스트해보세요.
+            참여 링크를 복사하여 참여자들에게 공유해보세요!
           </div>
         )}
 
@@ -348,7 +372,7 @@ export default function SettlementDetail({ data, onBack, onLinkTest }: Props) {
                       </div>
                     )}
                     
-                    {/* [수정] 관리 버튼 그룹 (관리자에게만 표시) */}
+                    {/* [수정] 수정/삭제 버튼 그룹 (정산 생성자에게만 표시) */}
                     {isCreator && (
                         <div style={{ marginTop: "16px", paddingTop: "12px", borderTop: "1px solid #f2f4f6", display: "flex", justifyContent: "flex-end", gap: "8px" }}>
                             <button 
