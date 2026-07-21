@@ -3,34 +3,37 @@
 import { useState } from "react";
 import styles from "./ParticipantInput.module.css";
 import { useToast } from "./ToastProvider";
-import { useRouter } from "next/navigation"; 
+import { useRouter } from "next/navigation";
 
 // 히스토리 매니저 임포트
 import { addToHistory } from "../lib/historyManager";
 
-interface Props {
-  settlementData: any; 
-  onSubmit: (participantData: any) => void;
-}
+// 데이터 청사진(타입) 및 계산 헬퍼 연결
+import type {
+  Settlement,
+  Item,
+  Participant,
+  CustomItem,
+  Selection,
+} from "../lib/types";
+import { toNumber } from "../lib/settlement";
 
-// 개별 항목 타입 정의
-interface CustomItem {
-  id: number;
-  category: string;
-  price: number;
+interface Props {
+  settlementData: Settlement;
+  onSubmit: (participantData: Participant) => void;
 }
 
 export default function ParticipantInput({ settlementData, onSubmit }: Props) {
   const { showToast } = useToast();
-  const router = useRouter(); 
+  const router = useRouter();
 
   const [name, setName] = useState("");
   const [contact, setContact] = useState("");
-  const [selections, setSelections] = useState<Record<number, any>>({});
+  const [selections, setSelections] = useState<Record<string, Selection>>({});
 
   // 개별 추가 항목 상태 관리
   const [customItems, setCustomItems] = useState<CustomItem[]>([]);
-  
+
   // 아코디언 입력 폼 상태
   const [isCustomFormOpen, setIsCustomFormOpen] = useState(false);
   const [newCustomCategory, setNewCustomCategory] = useState("");
@@ -42,7 +45,12 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
     return `${hour}:${minute}`;
   });
 
-  const toggleItem = (itemId: number, method: string, defaultStart?: string, defaultEnd?: string) => {
+  const toggleItem = (
+    itemId: string,
+    method: string,
+    defaultStart?: string,
+    defaultEnd?: string
+  ) => {
     setSelections((prev) => {
       const current = prev[itemId];
       if (current?.joined) {
@@ -50,7 +58,7 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
         delete newState[itemId];
         return newState;
       }
-      const newSelection: any = { joined: true };
+      const newSelection: Selection = { joined: true };
       if (method === "hourly") {
         newSelection.startTime = defaultStart || "";
         newSelection.endTime = defaultEnd || "";
@@ -59,7 +67,11 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
     });
   };
 
-  const handleTimeChange = (itemId: number, field: "startTime" | "endTime", value: string) => {
+  const handleTimeChange = (
+    itemId: string,
+    field: "startTime" | "endTime",
+    value: string
+  ) => {
     setSelections((prev) => ({
       ...prev,
       [itemId]: { ...prev[itemId], [field]: value },
@@ -72,19 +84,19 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
       showToast("항목 이름을 입력해주세요.");
       return;
     }
-    if (!newCustomPrice || parseInt(newCustomPrice.replace(/,/g, "")) === 0) {
+    if (!newCustomPrice || toNumber(newCustomPrice) === 0) {
       showToast("금액을 입력해주세요.");
       return;
     }
 
     const newItem: CustomItem = {
-      id: Date.now(),
+      id: crypto.randomUUID(),
       category: newCustomCategory,
-      price: parseInt(newCustomPrice.replace(/,/g, "")),
+      price: toNumber(newCustomPrice),
     };
 
     setCustomItems([...customItems, newItem]);
-    
+
     // 입력창 초기화 및 닫기
     setNewCustomCategory("");
     setNewCustomPrice("");
@@ -93,7 +105,7 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
   };
 
   // 개별 항목 삭제 함수
-  const handleDeleteCustomItem = (id: number) => {
+  const handleDeleteCustomItem = (id: string) => {
     setCustomItems(customItems.filter((item) => item.id !== id));
   };
 
@@ -118,8 +130,11 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
 
     for (const itemId in selections) {
       const sel = selections[itemId];
-      const originalItem = settlementData.items.find((i: any) => i.id === Number(itemId));
-      
+      // 항목 매칭: 옛 숫자 id·새 uuid 모두 안전하도록 문자열 기준 비교
+      const originalItem = settlementData.items.find(
+        (i: Item) => String(i.id) === String(itemId)
+      );
+
       if (originalItem?.method === "hourly") {
         if (!sel.startTime || !sel.endTime) {
           showToast(`'${originalItem.category}' 항목의 시간을 선택해주세요.`);
@@ -128,8 +143,8 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
       }
     }
 
-    const participantData = {
-      id: Date.now(),
+    const participantData: Participant = {
+      id: crypto.randomUUID(),
       name: name,
       contact: contact || "",
       selections: selections,
@@ -152,7 +167,7 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
         <div className={styles.subtitle}>
           정산자: {settlementData.settler}
         </div>
-        
+
         {/* 헤더 버튼 제거됨 */}
 
         {settlementData.settlerMessage && (
@@ -169,9 +184,9 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
           <label className={styles.label}>
             이름<span className={styles.required}>*</span>
           </label>
-          <input 
-            type="text" 
-            className={styles.input} 
+          <input
+            type="text"
+            className={styles.input}
             placeholder="실명 또는 닉네임"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -179,10 +194,10 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
         </div>
         <div>
           <label className={styles.label}>연락처</label>
-          <input 
+          <input
             type="text"
-            inputMode="tel" 
-            className={styles.input} 
+            inputMode="tel"
+            className={styles.input}
             placeholder="010-1234-5678"
             value={contact}
             onChange={(e) => setContact(e.target.value)}
@@ -193,32 +208,32 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
       {/* 2. 항목 리스트 */}
       <section className={styles.section}>
         <label className={styles.label}>지출 항목 선택</label>
-        
+
         <p className={styles.helperText}>
           본인이 참여한 항목을 선택해주세요.
         </p>
-        
+
         {/* 기존 공통 항목들 */}
-        {settlementData.items.map((item: any) => {
+        {settlementData.items.map((item: Item) => {
           const isSelected = selections[item.id]?.joined;
-          
+
           const settlerStartTime = item.startTime;
           const settlerStartIdx = settlerStartTime ? timeOptions.indexOf(settlerStartTime) : -1;
           const availableEndTimes = settlerStartIdx !== -1 ? timeOptions.slice(settlerStartIdx) : timeOptions;
 
           return (
-            <div 
-              key={item.id} 
+            <div
+              key={item.id}
               className={`${styles.itemCard} ${isSelected ? styles.itemCardActive : ""}`}
             >
-              <div 
+              <div
                 className={styles.itemHeader}
                 onClick={() => toggleItem(item.id, item.method, item.startTime, item.endTime)}
               >
                 <div>
                   <div className={styles.itemName}>{item.category}</div>
                   <div className={styles.itemPrice}>
-                    {Number(item.price.replace(/,/g, "")).toLocaleString()}원
+                    {toNumber(item.price).toLocaleString()}원
                     {item.method === "hourly" && <span style={{fontSize: '12px', color: '#0064FF', marginLeft: '4px'}}> (시간당)</span>}
                   </div>
                 </div>
@@ -235,7 +250,7 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
                   <div className={styles.timeInputs}>
                     <select
                       className={styles.timeSelect}
-                      value={selections[item.id].startTime || ""}
+                      value={selections[item.id]?.startTime || ""}
                       onChange={(e) => handleTimeChange(item.id, "startTime", e.target.value)}
                     >
                       {timeOptions.map((t) => <option key={t} value={t}>{t}</option>)}
@@ -243,7 +258,7 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
                     <span>~</span>
                     <select
                       className={styles.timeSelect}
-                      value={selections[item.id].endTime || ""}
+                      value={selections[item.id]?.endTime || ""}
                       onChange={(e) => handleTimeChange(item.id, "endTime", e.target.value)}
                     >
                       {availableEndTimes.map((t) => <option key={t} value={t}>{t}</option>)}
@@ -264,11 +279,11 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
                   {item.category} (직접 추가)
                 </div>
                 <div className={styles.itemPrice}>
-                  {item.price.toLocaleString()}원
+                  {toNumber(item.price).toLocaleString()}원
                 </div>
               </div>
-              
-              <button 
+
+              <button
                 onClick={() => handleDeleteCustomItem(item.id)}
                 style={{
                   background: "none",
@@ -312,7 +327,7 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
             <div className={styles.itemCard} style={{ padding: "16px", backgroundColor: "#fff" }}>
               <div style={{ marginBottom: "12px" }}>
                 <label style={{ fontSize: "13px", color: "#6b7684", display: "block", marginBottom: "6px" }}>항목 이름</label>
-                <input 
+                <input
                   type="text"
                   placeholder="예: 커피값, 내가 시킨 메뉴"
                   className={styles.input}
@@ -322,7 +337,7 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
               </div>
               <div style={{ marginBottom: "16px" }}>
                 <label style={{ fontSize: "13px", color: "#6b7684", display: "block", marginBottom: "6px" }}>금액</label>
-                <input 
+                <input
                   type="text"
                   inputMode="numeric"
                   placeholder="금액 입력"
@@ -365,11 +380,11 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
               </div>
 
               {/* 안내 문구 */}
-              <p style={{ 
-                marginTop: "12px", 
-                fontSize: "10px", 
-                color: "#6b7684", 
-                textAlign: "left" 
+              <p style={{
+                marginTop: "12px",
+                fontSize: "10px",
+                color: "#6b7684",
+                textAlign: "left"
               }}>
                 ※내가 추가로 지불할 항목이 있을 때만 추가해요.
               </p>
@@ -396,7 +411,6 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
             fontSize: "16px",
             cursor: "pointer",
             marginBottom: "12px", // 입력 완료 버튼과의 간격
-            // 호버 효과는 기본적으로 없음 (CSS 클래스 미사용)
           }}
         >
           📊 실시간 정산 결과 보기
@@ -407,7 +421,7 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
           입력 완료
         </button>
       </div>
-      
+
       <div style={{ height: "60px" }}></div>
     </div>
   );
