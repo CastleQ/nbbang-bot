@@ -50,9 +50,10 @@ export default function SettlementItems({ initialData, docId }: Props) {
 
   const participantOptions = Array.from({ length: 40 }, (_, i) => i + 1);
   
-  const timeOptions = Array.from({ length: 24 }, (_, i) => {
-    const hour = i.toString().padStart(2, "0");
-    return `${hour}:00`;
+  const timeOptions = Array.from({ length: 48 }, (_, i) => {
+    const hour = Math.floor(i / 2).toString().padStart(2, "0");
+    const minute = ((i % 2) * 30).toString().padStart(2, "0");
+    return `${hour}:${minute}`;
   });
 
   useEffect(() => {
