@@ -202,9 +202,10 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
         {settlementData.items.map((item: any) => {
           const isSelected = selections[item.id]?.joined;
           
-          const settlerStartTime = item.startTime;
-          const settlerStartIdx = settlerStartTime ? timeOptions.indexOf(settlerStartTime) : -1;
-          const availableEndTimes = settlerStartIdx !== -1 ? timeOptions.slice(settlerStartIdx) : timeOptions;
+          // 종료시간은 (참여자가 고른, 없으면 정산자의) 시작시간부터 24시간 — 자정을 넘기면 익일
+          const startTime = selections[item.id]?.startTime || item.startTime;
+          const startIdx = startTime ? timeOptions.indexOf(startTime) : -1;
+          const availableEndTimes = startIdx !== -1 ? [...timeOptions.slice(startIdx), ...timeOptions.slice(0, startIdx)] : timeOptions;
 
           return (
             <div 
@@ -246,7 +247,7 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
                       value={selections[item.id].endTime || ""}
                       onChange={(e) => handleTimeChange(item.id, "endTime", e.target.value)}
                     >
-                      {availableEndTimes.map((t) => <option key={t} value={t}>{t}</option>)}
+                      {availableEndTimes.map((t) => <option key={t} value={t}>{t}{startTime && t < startTime ? " (익일)" : ""}</option>)}
                     </select>
                   </div>
                 </div>

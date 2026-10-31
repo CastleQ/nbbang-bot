@@ -473,9 +473,9 @@ export default function SettlementDetail({ data, onBack, onLinkTest }: Props) {
                         const isSelected = editingParticipant.selections[item.id]?.joined;
                         const sel = editingParticipant.selections[item.id] || {};
 
-                        // 시작 시간에 따른 종료 시간 필터링
+                        // 종료시간은 시작시간부터 24시간 — 자정을 넘기면 익일
                         const startIdx = sel.startTime ? timeOptions.indexOf(sel.startTime) : -1;
-                        const availableEndTimes = startIdx !== -1 ? timeOptions.slice(startIdx) : timeOptions;
+                        const availableEndTimes = startIdx !== -1 ? [...timeOptions.slice(startIdx), ...timeOptions.slice(0, startIdx)] : timeOptions;
 
                         return (
                             <div key={item.id} style={{ 
@@ -521,7 +521,7 @@ export default function SettlementDetail({ data, onBack, onLinkTest }: Props) {
                                                 onChange={(e) => handleEditChange(item.id, "endTime", e.target.value)}
                                                 style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid #d1d6db" }}
                                             >
-                                                {availableEndTimes.map(t => <option key={t} value={t}>{t}</option>)}
+                                                {availableEndTimes.map(t => <option key={t} value={t}>{t}{sel.startTime && t < sel.startTime ? " (익일)" : ""}</option>)}
                                             </select>
                                         </div>
                                     </div>
