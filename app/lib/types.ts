@@ -4,8 +4,8 @@
 // - 이후 모든 화면/로직 파일이 이 타입들을 import 해서 재사용합니다. (any 대체용)
 //
 // [하위호환 메모 — 0-2 A안]
-// 옛 정산 문서는 금액이 "1,000" 같은 문자열, id가 숫자로 저장돼 있을 수 있습니다.
-// 아래 타입은 "정규화 이후"의 표준 모양(금액=number, id=string)입니다.
+// 옛 정산 문서는 금액이 "1,000" 같은 문자열, id가 숫자, participantCount가 "5"·"" 같은 문자열로 저장돼 있을 수 있습니다.
+// 아래 타입은 "정규화 이후"의 표준 모양(금액·participantCount=number, id=string)입니다.
 // Firestore에서 읽은 원본은 Phase 2의 toNumber/정규화를 거쳐 이 모양으로 변환됩니다.
 
 /** 정산 방식: 일반(1/N) 또는 시간당 비례 */
@@ -63,5 +63,5 @@ export interface Settlement {
   participants: Participant[]; // 참여자 목록
   totalAmount: number; // 공통 항목 총액(원). 참여자 개별항목은 Phase 2의 파생함수로 별도 반영.
   createdAt: string; // 생성 시각 (ISO 문자열)
-  bankInfo?: BankInfo; // 입금 계좌(선택)
+  bankInfo?: BankInfo | null; // 입금 계좌(선택). 미입력 시 null로 저장됨.
 }
