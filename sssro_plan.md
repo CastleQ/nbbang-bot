@@ -76,6 +76,7 @@
   - `getDurationMinutes` / `formatDuration` : 기존 로직 이전 (중복 제거)
   - `calculateSettlement(items, participants)` : 기존 로직 이전 + **[F1] 각 참여자의 `customItems` 금액을 total·details에 합산**
   - `getTotalAmount(items, participants)` : 방장 항목 + 참여자 개별항목까지 반영한 총액 파생 함수
+  - `timeOptions`(30분 단위 시간 목록) / 시작~종료 범위 목록 : `SettlementItems`·`ParticipantInput`·`SettlementDetail` 3곳 복사본을 이리로 통합. **30분 단위 고정(더 좁힐 계획 없음, 2026-11-02 결정)** → 단위 설정값으로 일반화하지 말 것.
   - 완료조건: 컴포넌트 의존성 없는 순수 함수로 완성 (테스트 가능 상태).
 
 ---

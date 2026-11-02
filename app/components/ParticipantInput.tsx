@@ -42,6 +42,15 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
     return `${hour}:${minute}`;
   });
 
+  // 정산자가 정한 시작~종료(자정 넘기면 익일까지) 범위의 시간 목록. 범위가 없으면(옛 데이터) 전체.
+  const getHostRange = (start?: string, end?: string) => {
+    const s = start ? timeOptions.indexOf(start) : -1;
+    const e = end ? timeOptions.indexOf(end) : -1;
+    if (s === -1 || e === -1) return timeOptions;
+    const length = Math.min(((e - s + 48) % 48 || 48) + 1, 48); // 시작=종료면 24시간 전체
+    return Array.from({ length }, (_, k) => timeOptions[(s + k) % 48]);
+  };
+
   const toggleItem = (itemId: number, method: string, defaultStart?: string, defaultEnd?: string) => {
     setSelections((prev) => {
       const current = prev[itemId];
@@ -202,10 +211,11 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
         {settlementData.items.map((item: any) => {
           const isSelected = selections[item.id]?.joined;
           
-          // 종료시간은 (참여자가 고른, 없으면 정산자의) 시작시간부터 24시간 — 자정을 넘기면 익일
-          const startTime = selections[item.id]?.startTime || item.startTime;
-          const startIdx = startTime ? timeOptions.indexOf(startTime) : -1;
-          const availableEndTimes = startIdx !== -1 ? [...timeOptions.slice(startIdx), ...timeOptions.slice(0, startIdx)] : timeOptions;
+          // 참여자는 정산자가 정한 범위 안에서만 선택. 종료는 고른 시작시간 이후만.
+          const hostRange = getHostRange(item.startTime, item.endTime);
+          const startIdx = hostRange.indexOf(selections[item.id]?.startTime);
+          const availableEndTimes = startIdx !== -1 ? hostRange.slice(startIdx) : hostRange;
+          const nextDayLabel = (t: string) => (item.startTime && t < item.startTime ? " (익일)" : "");
 
           return (
             <div 
@@ -237,9 +247,15 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
                     <select
                       className={styles.timeSelect}
                       value={selections[item.id].startTime || ""}
-                      onChange={(e) => handleTimeChange(item.id, "startTime", e.target.value)}
+                      onChange={(e) => {
+                        handleTimeChange(item.id, "startTime", e.target.value);
+                        // 시작을 종료보다 늦게 옮기면 종료를 정산자 종료시간으로 맞춤
+                        if (hostRange.indexOf(e.target.value) > hostRange.indexOf(selections[item.id].endTime)) {
+                          handleTimeChange(item.id, "endTime", hostRange[hostRange.length - 1]);
+                        }
+                      }}
                     >
-                      {timeOptions.map((t) => <option key={t} value={t}>{t}</option>)}
+                      {hostRange.map((t) => <option key={t} value={t}>{t}{nextDayLabel(t)}</option>)}
                     </select>
                     <span>~</span>
                     <select
@@ -247,7 +263,7 @@ export default function ParticipantInput({ settlementData, onSubmit }: Props) {
                       value={selections[item.id].endTime || ""}
                       onChange={(e) => handleTimeChange(item.id, "endTime", e.target.value)}
                     >
-                      {availableEndTimes.map((t) => <option key={t} value={t}>{t}{startTime && t < startTime ? " (익일)" : ""}</option>)}
+                      {availableEndTimes.map((t) => <option key={t} value={t}>{t}{nextDayLabel(t)}</option>)}
                     </select>
                   </div>
                 </div>
